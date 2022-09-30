@@ -43,6 +43,8 @@ toSchemyBool :: Bool -> SchemyExp
 toSchemyBool a = SchemyBool a
 
 
+-- convert fromList SchemyProcedure to SchemyExp
+
 main :: IO ()
 main = do
     -- let env = fromList [("pi", 3.14), ("e", exp 1.0)]

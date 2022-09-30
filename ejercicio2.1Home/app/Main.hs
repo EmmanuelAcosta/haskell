@@ -32,9 +32,14 @@ eval env (SchemyMult x y) = SchemyNumber ((evalDouble env x) * (evalDouble env y
 eval env (SchemySymbol x) = env ! x
 eval env (SchemyBool x) = SchemyBool x
 eval env (SchemyProcedure p) = p env []
+--SchemyForm is a list of one or more expressions in a recursive way
+-- First must evaluate a procedure who is used to complete the evaluation
 eval env (SchemyForm (SchemyProcedure p) args) = p env args
 eval env (SchemyForm (SchemySymbol s) args) = eval env (SchemyForm (env ! s) args)
-eval env (SchemyForm f args) = error "error"
+eval env (SchemyForm f args) = eval env (SchemyForm (eval env f) args)
+eval env (SchemyEnv e) = SchemyEnv e
+
+
 
 
 
@@ -47,7 +52,7 @@ evalDouble env _ = error "error"
 
 evalBool :: SchemyEnv -> SchemyExp -> Bool
 evalBool env exp = n
-    where (SchemyBool n) = eval env exp 
+    where (SchemyBool n) = eval env exp
 evalBool env _ = error "error"
 
 maxrec :: (Ord a) => [a] -> a
@@ -121,4 +126,9 @@ main = do
   print $ eval basicEnv (SchemyForm (SchemySymbol "or") [SchemyBool True, SchemyBool False])
   print $ "not True:"
   print $ eval basicEnv (SchemyForm (SchemySymbol "not") [SchemyBool True])
+  --SchemyForm who add two numbers and then multiply them
+  print $ eval basicEnv (SchemyForm (SchemySymbol "+") [SchemyNumber 2.0, SchemyNumber 2.0])
+  
+
+
 

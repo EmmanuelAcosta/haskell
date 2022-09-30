@@ -50,6 +50,13 @@ evalBool env exp = n
     where (SchemyBool n) = eval env exp 
 evalBool env _ = error "error"
 
+maxrec :: (Ord a) => [a] -> a
+maxrec [] = error "maximum of empty list"
+maxrec [x] = x
+maxrec (x:xs)
+  | x > maxTail = x
+  | otherwise = maxTail
+  where maxTail = maxrec xs
 
 
 -- function to convert fromList [("max", maxProcedure)] to SchemyEnv
@@ -58,11 +65,11 @@ evalBool env _ = error "error"
 main :: IO ()
 main = do
   let env = fromList [("x", (SchemyNumber 1.0)), ("y", (SchemyNumber 2.0))]
-  print $ "Adding"
+  print $ "Adding 1 and 2:"
   print $ eval env (SchemyAdd (SchemyNumber 1.0) (SchemyNumber 2.0))
-  print $ "Mult"
+  print $ "Mult 2 and 2:"
   print $ eval env (SchemyMult (SchemyNumber 2.0) (SchemyNumber 2.0))
-  print $ "Symbol"
+  print $ "Symbol x:"
   print $ eval env (SchemySymbol "x")
   print $ "Boolean"
   print $ eval env (SchemyBool True)
@@ -72,10 +79,10 @@ main = do
   print (SchemyProcedure (\_ _ -> SchemyNumber 1.0))
   print $ "Procedure:"
   print $ eval env (SchemyForm (SchemyProcedure (\_ _ -> SchemyNumber 1.0)) [])
-  let maxProcedure = SchemyProcedure (\_ [x, y] -> if (evalDouble env x) > (evalDouble env y) then x else y)
+  let maxProcedure = SchemyProcedure (\_ list -> SchemyNumber (maxrec (map (evalDouble env) list)))
   let env2 = fromList [("max", maxProcedure)]
-  print $ "Max of 1 and 2:"
-  print $ eval env2 (SchemyForm (SchemySymbol "max") [SchemyNumber 1.0, SchemyNumber 2.0])
+  print $ "Max of list:"
+  print $ eval env2 (SchemyForm (SchemySymbol "max") [SchemyNumber 1.0, SchemyNumber 2.0,SchemyNumber 6.0])
   --basicEnv has operations like +, -, *, /, >, <, >=, <=, =, and, or, not
   let basicEnv = fromList [("+", SchemyProcedure (\_ [x, y] -> SchemyNumber ((evalDouble env x) + (evalDouble env y)))),
                            ("-", SchemyProcedure (\_ [x, y] -> SchemyNumber ((evalDouble env x) - (evalDouble env y)))),
@@ -92,12 +99,12 @@ main = do
   --Description of adding
   print $ "Adding 1 and 2:"
   print $ eval basicEnv (SchemyForm (SchemySymbol "+") [SchemyNumber 1.0, SchemyNumber 2.0])
-  print $ "Subtracting 1 and 2:"
-  print $ eval basicEnv (SchemyForm (SchemySymbol "-") [SchemyNumber 1.0, SchemyNumber 2.0])
-  print $ "Multiplying 1 and 2:"
-  print $ eval basicEnv (SchemyForm (SchemySymbol "*") [SchemyNumber 1.0, SchemyNumber 2.0])
-  print $ "Dividing 1 and 2:"
-  print $ eval basicEnv (SchemyForm (SchemySymbol "/") [SchemyNumber 1.0, SchemyNumber 2.0])
+  print $ "Subtracting 7 and 2:"
+  print $ eval basicEnv (SchemyForm (SchemySymbol "-") [SchemyNumber 7.0, SchemyNumber 2.0])
+  print $ "Multiplying 4 and 2:"
+  print $ eval basicEnv (SchemyForm (SchemySymbol "*") [SchemyNumber 4.0, SchemyNumber 2.0])
+  print $ "Dividing 4 and 2:"
+  print $ eval basicEnv (SchemyForm (SchemySymbol "/") [SchemyNumber 4.0, SchemyNumber 2.0])
   print $ "1 > 2:"
   print $ eval basicEnv (SchemyForm (SchemySymbol ">") [SchemyNumber 1.0, SchemyNumber 2.0])
   print $ "1 < 2:"
